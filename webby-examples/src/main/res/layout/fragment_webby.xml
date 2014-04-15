@@ -1,0 +1,35 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="@dimen/activity_vertical_margin"
+    tools:context="com.swampmobile.webby.examples.activities.MainActivity"
+    tools:ignore="MergeRootFrame">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/text_webby_fragment"
+        />
+
+    <TextView
+        android:id="@+id/textview_webby_status"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:padding="@dimen/activity_vertical_margin"
+        android:textColor="#888888"
+        android:textStyle="italic"
+        android:text="Press button to run Webby request."
+        />
+
+    <Button
+        android:id="@+id/button_test_webby"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Test Webby"
+        />
+
+</LinearLayout>

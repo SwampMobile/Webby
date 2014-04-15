@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Webby</string>
+    <string name="title_activity_main">Webby</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_webby">Webby In Activity</string>
+    <string name="text_webby_activity">WebbyManager is used within Activities to launch webservice requests asynchronously.  First add a request to WebbyManager, then @Subscribe for WebbyEvents to handle the webservice response.  Don\'t forget to check the WebbyEvent\'s resourceId to make sure it matches the one you asked for.</string>
+    <string name="title_activity_webby_fragment">Webby In Fragment</string>
+    <string name="text_webby_fragment">Webby works the same in a Fragment as it does in an Activity with only minor modification in where the WebbyManager gets instantiated.  This view is being presented in a Fragment and the following Webby test is done entirely in this fragment.</string>
+
+</resources>
