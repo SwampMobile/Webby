@@ -41,6 +41,8 @@ public abstract class WebbyRequest<T extends Object> implements Runnable
     private boolean resultFromCache;
     private Duration refreshDuration;
 
+    private int statusCode;
+    private String statusPhrase;
     private JsonElement data;
 
     private Exception loadException;
@@ -98,6 +100,16 @@ public abstract class WebbyRequest<T extends Object> implements Runnable
     public boolean wasSuccessful()
     {
         return loadException == null;
+    }
+
+    public int getStatusCode()
+    {
+        return statusCode;
+    }
+
+    public String getStatusPhrase()
+    {
+        return statusPhrase;
     }
 
     /**
@@ -187,6 +199,9 @@ public abstract class WebbyRequest<T extends Object> implements Runnable
         T webservice = restAdapter.create(restAdapterClass);
 
         Response response = doWebServiceCall(webservice);
+
+        statusCode = response.getStatus();
+        statusPhrase = response.getReason();
 
         JsonParser parser = new JsonParser();
         JsonElement data = parser.parse(new JsonReader(new InputStreamReader(response.getBody().in())));

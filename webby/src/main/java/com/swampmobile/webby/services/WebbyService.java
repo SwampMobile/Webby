@@ -278,11 +278,11 @@ public class WebbyService extends Service
                     WebbyResponse event;
                     if(request.wasSuccessful())
                     {
-                        event = new WebbyResponse(request.getUri(), request.getData(), request.isDataFromCache());
+                        event = new WebbyResponse(request.getUri(), request.getStatusCode(), request.getStatusPhrase(), request.getData(), request.isDataFromCache());
                     }
                     else
                     {
-                        event = new WebbyResponse(request.getUri(), request.getException());
+                        event = new WebbyResponse(request.getUri(), request.getStatusCode(), request.getStatusPhrase(), request.getException());
                     }
                     Webby.getBus().post(event);
 				}

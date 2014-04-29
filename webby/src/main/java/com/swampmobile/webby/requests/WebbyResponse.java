@@ -10,19 +10,23 @@ import com.google.gson.JsonElement;
 public class WebbyResponse
 {
     private Uri resourceId;
+    private int statusCode;
+    private String statusPhrase;
     private JsonElement response;
     private boolean isFromCache;
     private Exception error;
 
-    public WebbyResponse(Uri resourceId, Exception error)
+    public WebbyResponse(Uri resourceId, int statusCode, String statusPhrase, Exception error)
     {
-        this(resourceId, null, false);
+        this(resourceId, statusCode, statusPhrase, null, false);
         this.error = error;
     }
 
-    public WebbyResponse(Uri resourceId, JsonElement response, boolean isFromCache)
+    public WebbyResponse(Uri resourceId, int statusCode, String statusPhrase, JsonElement response, boolean isFromCache)
     {
         this.resourceId = resourceId;
+        this.statusCode = statusCode;
+        this.statusPhrase = statusPhrase;
         this.response = response;
         this.isFromCache = isFromCache;
     }
@@ -30,6 +34,16 @@ public class WebbyResponse
     public Uri getResourceId()
     {
         return resourceId;
+    }
+
+    public int getResponseStatusCode()
+    {
+        return statusCode;
+    }
+
+    public String getResponseStatusPhrase()
+    {
+        return statusPhrase;
     }
 
     public JsonElement getResponse()
