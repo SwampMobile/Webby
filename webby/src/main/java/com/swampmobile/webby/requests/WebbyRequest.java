@@ -208,6 +208,10 @@ public abstract class WebbyRequest<T extends Object> implements Runnable
             JsonParser parser = new JsonParser();
             data = parser.parse(new JsonReader(new InputStreamReader(response.getBody().in())));
         }
+        catch(Exception e)
+        {
+            throw e;
+        }
         finally
         {
             if(response != null)
