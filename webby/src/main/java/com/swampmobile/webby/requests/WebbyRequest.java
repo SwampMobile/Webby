@@ -6,6 +6,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonReader;
 import com.swampmobile.webby.Webby;
+import com.swampmobile.webby.util.logging.WebbyLog;
 import com.swampmobile.webby.util.time.Duration;
 
 import java.io.InputStreamReader;
@@ -202,6 +203,7 @@ public abstract class WebbyRequest<T extends Object> implements Runnable
 
         statusCode = response.getStatus();
         statusPhrase = response.getReason();
+        WebbyLog.d(TAG, "Response status, code: " + statusCode + ", reason: " + statusPhrase);
 
         JsonParser parser = new JsonParser();
         JsonElement data = parser.parse(new JsonReader(new InputStreamReader(response.getBody().in())));
