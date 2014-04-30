@@ -11,7 +11,9 @@ import com.swampmobile.webby.util.time.Duration;
 
 import java.io.InputStreamReader;
 
+import retrofit.ErrorHandler;
 import retrofit.RestAdapter;
+import retrofit.RetrofitError;
 import retrofit.client.Response;
 
 /**
@@ -67,14 +69,7 @@ public abstract class WebbyRequest<T extends Object> implements Runnable
      */
     public void run()
     {
-        try
-        {
-            data = loadInBackground();
-        }
-        catch (Exception e)
-        {
-            loadException = e;
-        }
+        data = loadInBackground();
     }
 
     public Duration getRefreshDuration()
@@ -108,9 +103,19 @@ public abstract class WebbyRequest<T extends Object> implements Runnable
         return statusCode;
     }
 
+    protected void setStatusCode(int code)
+    {
+        this.statusCode = code;
+    }
+
     public String getStatusPhrase()
     {
         return statusPhrase;
+    }
+
+    protected void setStatusPhrase(String phrase)
+    {
+        this.statusPhrase = phrase;
     }
 
     /**
@@ -138,6 +143,11 @@ public abstract class WebbyRequest<T extends Object> implements Runnable
     public Exception getException()
     {
         return loadException;
+    }
+
+    protected void setException(Exception e)
+    {
+        this.loadException = e;
     }
 
     public Uri getUri()
@@ -190,40 +200,65 @@ public abstract class WebbyRequest<T extends Object> implements Runnable
      * @return
      * @throws Exception
      */
-    private JsonElement loadInBackground() throws Exception
+    private JsonElement loadInBackground()
     {
         RestAdapter restAdapter = new RestAdapter.Builder()
                 .setEndpoint(endpoint)
+                .setErrorHandler(new ErrorHandler()
+                {
+                    @Override
+                    public Throwable handleError(RetrofitError cause)
+                    {
+                        return WebbyRequest.this.handleError(cause);
+                    }
+                })
                 .setLogLevel(Webby.getRetrofitLogLevel())
                 .build();
 
         T webservice = restAdapter.create(restAdapterClass);
 
-        Response response = null;
+        Response response;
         JsonElement data = null;
         try
         {
+            WebbyLog.d(TAG, "Running webservice call");
             response = doWebServiceCall(webservice);
 
+            WebbyLog.v(TAG, "Setting HTTP status");
+            statusCode = response.getStatus();
+            statusPhrase = response.getReason();
+            WebbyLog.v(TAG, "Response status, code: " + statusCode + ", reason: " + statusPhrase);
+
+            WebbyLog.d(TAG, "Parsing response: " + response);
             JsonParser parser = new JsonParser();
             data = parser.parse(new JsonReader(new InputStreamReader(response.getBody().in())));
         }
         catch(Exception e)
         {
-            throw e;
+            WebbyLog.d(TAG, "An exception occurred during request: " + e);
+            setException(e);
         }
-        finally
-        {
-            if(response != null)
-            {
-                // there was an issue, but it looks like we still have a valid http response
-                statusCode = response.getStatus();
-                statusPhrase = response.getReason();
-                WebbyLog.d(TAG, "Response status, code: " + statusCode + ", reason: " + statusPhrase);
-            }
 
-            return data;
+        return data;
+    }
+
+    /**
+     * Hook for request implementations to handle RetrofitErrors.
+     * @param cause
+     * @return
+     */
+    protected Throwable handleError(RetrofitError cause)
+    {
+        WebbyLog.d(TAG, "Handling RetrofitError:" + cause);
+        Response response = cause.getResponse();
+        if(response != null)
+        {
+            statusCode = response.getStatus();
+            statusPhrase = response.getReason();
+            WebbyLog.d(TAG, " - response is reporting: " + statusCode + " - " + statusPhrase);
         }
+
+        throw cause;
     }
 
     /**
