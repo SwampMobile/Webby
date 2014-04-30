@@ -225,8 +225,8 @@ public abstract class WebbyRequest<T extends Object> implements Runnable
             response = doWebServiceCall(webservice);
 
             WebbyLog.v(TAG, "Setting HTTP status");
-            statusCode = response.getStatus();
-            statusPhrase = response.getReason();
+            setStatusCode(response.getStatus());
+            setStatusPhrase(response.getReason());
             WebbyLog.v(TAG, "Response status, code: " + statusCode + ", reason: " + statusPhrase);
 
             WebbyLog.d(TAG, "Parsing response: " + response);
@@ -253,8 +253,8 @@ public abstract class WebbyRequest<T extends Object> implements Runnable
         Response response = cause.getResponse();
         if(response != null)
         {
-            statusCode = response.getStatus();
-            statusPhrase = response.getReason();
+            setStatusCode(response.getStatus());
+            setStatusPhrase(response.getReason());
             WebbyLog.d(TAG, " - response is reporting: " + statusCode + " - " + statusPhrase);
         }
 
