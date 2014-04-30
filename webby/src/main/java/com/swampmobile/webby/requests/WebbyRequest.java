@@ -199,16 +199,27 @@ public abstract class WebbyRequest<T extends Object> implements Runnable
 
         T webservice = restAdapter.create(restAdapterClass);
 
-        Response response = doWebServiceCall(webservice);
+        Response response = null;
+        JsonElement data = null;
+        try
+        {
+            response = doWebServiceCall(webservice);
 
-        statusCode = response.getStatus();
-        statusPhrase = response.getReason();
-        WebbyLog.d(TAG, "Response status, code: " + statusCode + ", reason: " + statusPhrase);
+            JsonParser parser = new JsonParser();
+            data = parser.parse(new JsonReader(new InputStreamReader(response.getBody().in())));
+        }
+        finally
+        {
+            if(response != null)
+            {
+                // there was an issue, but it looks like we still have a valid http response
+                statusCode = response.getStatus();
+                statusPhrase = response.getReason();
+                WebbyLog.d(TAG, "Response status, code: " + statusCode + ", reason: " + statusPhrase);
+            }
 
-        JsonParser parser = new JsonParser();
-        JsonElement data = parser.parse(new JsonReader(new InputStreamReader(response.getBody().in())));
-
-        return data;
+            return data;
+        }
     }
 
     /**
