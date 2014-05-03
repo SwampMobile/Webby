@@ -16,9 +16,9 @@ public class WebbyResponse
     private boolean isFromCache;
     private Exception error;
 
-    public WebbyResponse(Uri resourceId, int statusCode, String statusPhrase, Exception error)
+    public WebbyResponse(Uri resourceId, int statusCode, String statusPhrase, JsonElement response, Exception error)
     {
-        this(resourceId, statusCode, statusPhrase, null, false);
+        this(resourceId, statusCode, statusPhrase, response, false);
         this.error = error;
     }
 

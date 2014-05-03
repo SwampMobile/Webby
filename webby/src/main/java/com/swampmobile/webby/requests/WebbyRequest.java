@@ -9,6 +9,7 @@ import com.swampmobile.webby.Webby;
 import com.swampmobile.webby.util.logging.WebbyLog;
 import com.swampmobile.webby.util.time.Duration;
 
+import java.io.IOException;
 import java.io.InputStreamReader;
 
 import retrofit.ErrorHandler;
@@ -69,7 +70,7 @@ public abstract class WebbyRequest<T extends Object> implements Runnable
      */
     public void run()
     {
-        data = loadInBackground();
+        loadInBackground();
     }
 
     public Duration getRefreshDuration()
@@ -200,8 +201,9 @@ public abstract class WebbyRequest<T extends Object> implements Runnable
      * @return
      * @throws Exception
      */
-    private JsonElement loadInBackground()
+    private void loadInBackground()
     {
+        // Build Webservice
         RestAdapter restAdapter = new RestAdapter.Builder()
                 .setEndpoint(endpoint)
                 .setErrorHandler(new ErrorHandler()
@@ -217,33 +219,24 @@ public abstract class WebbyRequest<T extends Object> implements Runnable
 
         T webservice = restAdapter.create(restAdapterClass);
 
+        // Run call
         Response response;
-        JsonElement data = null;
         try
         {
             WebbyLog.d(TAG, "Running webservice call");
             response = doWebServiceCall(webservice);
 
-            WebbyLog.v(TAG, "Setting HTTP status");
-            setStatusCode(response.getStatus());
-            setStatusPhrase(response.getReason());
-            WebbyLog.v(TAG, "Response status, code: " + statusCode + ", reason: " + statusPhrase);
-
-            WebbyLog.d(TAG, "Parsing response: " + response);
-            JsonParser parser = new JsonParser();
-            data = parser.parse(new JsonReader(new InputStreamReader(response.getBody().in())));
+            processResponse(response);
         }
         catch(Exception e)
         {
             WebbyLog.d(TAG, "An exception occurred during request: " + e);
             setException(e);
         }
-
-        return data;
     }
 
     /**
-     * Hook for request implementations to handle RetrofitErrors.
+     * When RetrofitErrors occur, try to recover as much as possible.
      * @param cause
      * @return
      */
@@ -253,12 +246,34 @@ public abstract class WebbyRequest<T extends Object> implements Runnable
         Response response = cause.getResponse();
         if(response != null)
         {
-            setStatusCode(response.getStatus());
-            setStatusPhrase(response.getReason());
-            WebbyLog.d(TAG, " - response is reporting: " + statusCode + " - " + statusPhrase);
+            try
+            {
+                processResponse(response);
+            }
+            catch (IOException e)
+            {
+                WebbyLog.d(TAG, "While handing a RetrofitError, an IOException occurred.");
+                e.printStackTrace();
+            }
+        }
+        else
+        {
+            WebbyLog.d(TAG, "There is no response to recover.");
         }
 
         throw cause;
+    }
+
+    private void processResponse(Response response) throws IOException
+    {
+        WebbyLog.v(TAG, "Setting HTTP status");
+        setStatusCode(response.getStatus());
+        setStatusPhrase(response.getReason());
+        WebbyLog.v(TAG, "Response status, code: " + statusCode + ", reason: " + statusPhrase);
+
+        WebbyLog.d(TAG, "Parsing response: " + response);
+        JsonParser parser = new JsonParser();
+        setData(parser.parse(new JsonReader(new InputStreamReader(response.getBody().in()))));
     }
 
     /**
